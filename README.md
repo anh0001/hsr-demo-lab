@@ -1,5 +1,3 @@
-Here's the content formatted in proper markdown:
-
 # HSR Demo Lab
 
 ## Getting Started
