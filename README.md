@@ -70,7 +70,7 @@ This option is particularly useful for developers using macOS laptops.
 #### Steps:
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/hsr-demo-lab.git
+   git clone https://github.com/anh0001/hsr-demo-lab.git
    cd hsr-demo-lab
    ```
 
@@ -81,7 +81,7 @@ This option is particularly useful for developers using macOS laptops.
 
 3. Run the Docker container:
    ```bash
-   docker run --platform linux/amd64 -p 5900:5900 -p 8080:8080 -p 8888:8888 hsr-demo-lab
+   docker run --platform linux/amd64 -p 5900:5900 -p 8080:8080 -p 8888:8888 -p 11311:11311 -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
    ```
 
 4. Access the development environment:

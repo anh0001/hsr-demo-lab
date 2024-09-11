@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     xterm \
     python3-pip \
     python3-dev \
+    python3-venv \
     tmux \
     wget \
     chrony \
@@ -89,11 +90,13 @@ RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
     echo "logchange 0.5" >> /etc/chrony/chrony.conf && \
     echo "initstepslew 20 hsrb.local" >> /etc/chrony/chrony.conf
 
+RUN mkdir -p /root/hsr-demo-lab
+
 # Install Jupyter Notebook
-RUN pip3 install --upgrade pip && \
-    pip3 install virtualenv && \
-    virtualenv --system-site-packages /root/hsr_env && \
+# Dont use the virtual environtment in the folder /root/hsr-demo-lab, as the directory is mounted to the host
+RUN python3 -m venv /root/hsr_env && \
     . /root/hsr_env/bin/activate && \
+    pip install --upgrade pip && \
     pip install jupyter
 
 # Set up Jupyter configuration directory
@@ -112,7 +115,7 @@ COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
 # Set default working directory
-WORKDIR /root
+WORKDIR /root/hsr-demo-lab
 
 # Expose the ports for VNC, noVNC, and Jupyter Notebook
 EXPOSE 5900 8080 8888

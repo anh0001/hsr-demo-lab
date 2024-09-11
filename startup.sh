@@ -7,7 +7,7 @@ sudo /etc/init.d/dbus start
 
 # Start Xvfb
 Xvfb :1 -screen 0 1024x768x16 &
-sleep 2
+sleep 5
 
 # Export display for X applications
 export DISPLAY=:1
@@ -17,7 +17,7 @@ twm &
 
 # Start X11VNC
 x11vnc -forever -usepw -create -display :1 &
-sleep 2
+sleep 10
 
 # Start noVNC
 /opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 0.0.0.0:8080 &
