@@ -15,6 +15,10 @@ This repository serves as a central resource for researchers, developers, and st
 
 ## Getting Started
 
+You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or using Docker (recommended for macOS users).
+
+### Option 1: Manual Setup on Ubuntu 20.04
+
 1. Clone this repo and navigate to the directory:
    ```
    git clone https://github.com/your-username/hsr-demo-lab.git
@@ -54,7 +58,48 @@ This repository serves as a central resource for researchers, developers, and st
    sudo apt-get install ros-noetic-tmc-desktop-full
    ```
 
-## Environment Setup
+### Option 2: Docker Setup (Recommended for macOS)
+
+This option is particularly useful for developers using macOS laptops.
+
+#### Prerequisites:
+- Install Docker Desktop on your macOS system
+- Ensure Rosetta 2 is installed (required for M1/M2 Macs)
+- In Docker Desktop settings, activate the "Use Rosetta for x86/amd64 emulation on Apple Silicon" option
+
+#### Steps:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/hsr-demo-lab.git
+   cd hsr-demo-lab
+   ```
+
+2. Build the Docker image:
+   ```bash
+   docker build --platform linux/amd64 -t hsr-demo-lab .
+   ```
+
+3. Run the Docker container:
+   ```bash
+   docker run --platform linux/amd64 -p 5900:5900 -p 8080:8080 -p 8888:8888 hsr-demo-lab
+   ```
+
+4. Access the development environment:
+   - Open noVNC (for GUI access):
+     ```bash
+     open http://localhost:8080/
+     ```
+     Enter the password: 1233
+     Use the tmux terminal within noVNC for command-line operations
+
+   - Open Jupyter Notebook:
+     ```bash
+     open http://localhost:8888/
+     ```
+
+Now you can develop and test your HSR applications within this containerized environment.
+
+## Environment Setup (for Manual Installation)
 
 1. Edit `.bashrc`:
    ```bash
@@ -160,7 +205,7 @@ Configure appropriately to match the network, time synchronization server, and c
    sudo service chrony restart
    ```
 
-## Installing Jupyter Notebook
+## Installing Jupyter Notebook (for Manual Installation)
 
 1. Install Python and pip:
    ```bash
