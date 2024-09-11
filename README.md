@@ -1,9 +1,23 @@
 # HSR Demo Lab
 
+This repository contains tools and instructions for developing programs that interface with the real Toyota Human Support Robot (HSR). It provides a development environment and examples for creating applications that can control and interact with the HSR in real-world scenarios.
+
+## Repository Description
+
+The HSR Demo Lab is designed to facilitate the development of software for the Toyota HSR. It includes:
+
+- Setup instructions for the development environment
+- Guidelines for connecting to and communicating with the physical HSR
+- Examples and tools for common HSR operations
+- Simulator setup for testing without the physical robot
+
+This repository serves as a central resource for researchers, developers, and students working on projects involving the Toyota HSR, enabling them to quickly set up their development environment and start creating applications for the robot.
+
 ## Getting Started
 
 1. Clone this repo and navigate to the directory:
    ```
+   git clone https://github.com/your-username/hsr-demo-lab.git
    cd hsr-demo-lab
    ```
 
