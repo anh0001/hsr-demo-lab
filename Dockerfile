@@ -1,6 +1,9 @@
 # Use Ubuntu 20.04 AMD64 as the base image
 FROM ubuntu:20.04
 
+# Use Bash for all following RUN steps
+SHELL ["/bin/bash", "-lc"]
+
 # Prevents errors during package installations
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -116,10 +119,11 @@ RUN echo '# please set network-interface' >> /root/.bashrc && \
 RUN mkdir -p /root/catkin_ws/src && \
     cd /root/catkin_ws/src && \
     git clone https://github.com/hsr-project/hsrb_interfaces.git && \
+    git clone https://github.com/hsr-project/hsr_kinematics.git && \
     cd /root/catkin_ws && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -r -y --rosdistro noetic && \
-    . /opt/ros/noetic/setup.bash && \
+    source /opt/ros/noetic/setup.bash && \
     catkin_make
 
 # Modify .bashrc to source the new workspace after ROS
