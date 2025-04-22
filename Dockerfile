@@ -43,6 +43,41 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt
 RUN mkdir -p /etc/apt/auth.conf.d && \
     echo -e "machine packages.hsr.io\nlogin hsr-user\npassword jD3k4G2e" > /etc/apt/auth.conf.d/auth.conf
 
+# Add package pinning configuration (this was missing in the original)
+RUN cat <<-'EOF' > /etc/apt/preferences
+Package: ros-noetic-laser-ortho-projector
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-laser-scan-matcher
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-laser-scan-sparsifier
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-laser-scan-splitter
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-ncd-parser
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-polar-scan-matcher
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-scan-to-cloud-converter
+Pin: version 0.3.3*
+Pin-Priority: 1001
+
+Package: ros-noetic-scan-tools
+Pin: version 0.3.3*
+Pin-Priority: 1001
+EOF
+
 # Install ROS Noetic Desktop-Full and HSR packages
 RUN apt-get update && \
     apt-get install -y ros-noetic-desktop-full && \
