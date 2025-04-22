@@ -112,6 +112,19 @@ RUN echo '# please set network-interface' >> /root/.bashrc && \
     echo 'alias sim_mode='"'"'export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc && \
     echo 'alias hsrb_mode='"'"'export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc
 
+# Build HSRB interface from source
+RUN mkdir -p /root/catkin_ws/src && \
+    cd /root/catkin_ws/src && \
+    git clone https://github.com/hsr-project/hsrb_interfaces.git && \
+    cd /root/catkin_ws && \
+    rosdep update && \
+    rosdep install --from-paths src --ignore-src -r -y --rosdistro noetic && \
+    . /opt/ros/noetic/setup.bash && \
+    catkin_make
+
+# Modify .bashrc to source the new workspace after ROS
+RUN sed -i '/source \/opt\/ros\/noetic\/setup.bash/a \    source \/root\/catkin_ws\/devel\/setup.bash' /root/.bashrc
+
 # Configure chrony
 RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
     echo "server hsrb.local" > /etc/chrony/chrony.conf && \
@@ -148,6 +161,9 @@ RUN mkdir ~/.vnc && x11vnc -storepasswd 1234 ~/.vnc/passwd
 # Copy startup script
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
+
+# Ensure startup script sources the workspace
+RUN echo "source /root/catkin_ws/devel/setup.bash" >> /startup.sh
 
 # Set default working directory
 WORKDIR /root/hsr-demo-lab
