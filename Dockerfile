@@ -83,7 +83,6 @@ EOF
 
 # Install ROS Noetic Desktop-Full and HSR packages
 RUN apt-get update && \
-    apt-get install -y ros-noetic-desktop-full && \
     apt-get install -y ros-noetic-tmc-desktop-full && \
     rm -rf /var/lib/apt/lists/*
 
@@ -116,6 +115,8 @@ RUN echo '# please set network-interface' >> /root/.bashrc && \
     echo 'alias hsrb_mode='"'"'export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc
 
 # Build HSRB interface from source
+# Copy local 'deps' directory into the image
+COPY ./deps /root/hsr-demo-lab/deps
 RUN mkdir -p /root/catkin_ws/src && \
     cd /root/catkin_ws/src && \
     cp -r /root/hsr-demo-lab/deps/hsrb_interfaces . && \
@@ -167,13 +168,13 @@ COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
 # Ensure startup script sources the workspace
-RUN echo "source /root/catkin_ws/devel/setup.bash" >> /startup.sh
+RUN printf "\nsource /opt/ros/noetic/setup.bash\nsource /root/catkin_ws/devel/setup.bash\n" >> /startup.sh
 
 # Set default working directory
 WORKDIR /root/hsr-demo-lab
 
-# Expose the ports for VNC, noVNC, and Jupyter Notebook
-EXPOSE 5900 8080 8888
+# Map container port 8080 to host port 8081 and container port 8888 to host port 8889
+EXPOSE 5900 8081 9113
 
 # Run the startup script
 CMD ["/startup.sh"]

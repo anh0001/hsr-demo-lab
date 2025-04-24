@@ -111,20 +111,20 @@ This option is particularly useful for developers using macOS laptops.
 
 3. Run the Docker container:
    ```bash
-   docker run --platform linux/amd64 -p 5900:5900 -p 8080:8080 -p 8888:8888 -p 11311:11311 -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
+   docker run --platform linux/amd64 -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
    ```
 
 4. Access the development environment:
    - Open noVNC (for GUI access):
      ```bash
-     open http://localhost:8080/
+     open http://localhost:8081/
      ```
      Enter the password: 1234
      Use the tmux terminal within noVNC for command-line operations
 
    - Open Jupyter Notebook:
      ```bash
-     open http://localhost:8888/
+     open http://localhost:8889/
      ```
 
 Now you can develop and test your HSR applications within this containerized environment.
