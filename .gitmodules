@@ -1,0 +1,6 @@
+[submodule "deps/hsrb_interfaces"]
+	path = deps/hsrb_interfaces
+	url = https://github.com/hsr-project/hsrb_interfaces.git
+[submodule "deps/hsrb_kinematics"]
+	path = deps/hsrb_kinematics
+	url = https://github.com/hsr-project/hsrb_kinematics.git
