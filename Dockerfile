@@ -169,7 +169,7 @@ RUN mkdir ~/.vnc && x11vnc -storepasswd 1234 ~/.vnc/passwd
 WORKDIR /root/hsr-demo-lab
 
 # Map container ports
-EXPOSE 5900 8081 9113
+EXPOSE 5900 8081 9113 11311
 
 # Run the startup script
 CMD ["/startup.sh"]
