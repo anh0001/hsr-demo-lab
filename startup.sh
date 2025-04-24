@@ -53,7 +53,9 @@ c.NotebookApp.token = ''
 c.NotebookApp.password = ''
 EOT
 
-# Start Jupyter Notebook
+# Start Jupyter Notebook with ROS env
+source /opt/ros/noetic/setup.bash
+export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH
 source /root/hsr_env/bin/activate
 jupyter notebook --allow-root --config=/root/.jupyter/jupyter_notebook_config.py &
 

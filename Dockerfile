@@ -135,6 +135,21 @@ RUN python3 -m venv /root/hsr_env && \
     pip install --upgrade pip && \
     pip install jupyter
 
+# create IPython startup to set ROS vars
+RUN mkdir -p /root/.ipython/profile_default/startup/ && \
+    echo "import os" > /root/.ipython/profile_default/startup/00-ros.py && \
+    echo "os.environ['ROS_MASTER_URI'] = 'http://hsrb.local:11311'" >> /root/.ipython/profile_default/startup/00-ros.py && \
+    echo "os.environ['PYTHONPATH'] = '/opt/ros/noetic/lib/python3/dist-packages:' + os.environ.get('PYTHONPATH','')" >> /root/.ipython/profile_default/startup/00-ros.py
+
+# patch startup.sh to source ROS & set PYTHONPATH before Jupyter
+RUN sed -i '/jupyter notebook/i source /opt/ros/noetic/setup.bash\nexport PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH' /startup.sh
+
+# ensure venv carries ROS PYTHONPATH & register a ROS-enabled kernel
+RUN . /root/hsr_env/bin/activate && \
+    echo "export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH" >> /root/hsr_env/bin/activate && \
+    pip install ipykernel && \
+    python -m ipykernel install --user --name=hsr_env --display-name="HSR Python (ROS Enabled)"
+
 # Set up Jupyter configuration directory
 RUN mkdir -p /root/.jupyter
 
