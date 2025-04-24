@@ -42,11 +42,11 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt
     wget https://hsr-user:jD3k4G2e@packages.hsr.io/tmc.key -O - | apt-key add - && \
     wget https://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
 
-# Set up authentication
+# Set up authentication properly (this is crucial)
 RUN mkdir -p /etc/apt/auth.conf.d && \
     echo -e "machine packages.hsr.io\nlogin hsr-user\npassword jD3k4G2e" > /etc/apt/auth.conf.d/auth.conf
 
-# Add package pinning configuration (this was missing in the original)
+# Add package pinning configuration
 RUN cat <<-'EOF' > /etc/apt/preferences
 Package: ros-noetic-laser-ortho-projector
 Pin: version 0.3.3*
@@ -114,26 +114,6 @@ RUN echo '# please set network-interface' >> /root/.bashrc && \
     echo 'alias sim_mode='"'"'export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc && \
     echo 'alias hsrb_mode='"'"'export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc
 
-# # First copy the deps directory
-# COPY ./deps /root/hsr-demo-lab/deps
-
-# RUN mkdir -p /root/catkin_ws/src && \
-#     cd /root/catkin_ws/src && \
-#     cp -r /root/hsr-demo-lab/deps/hsrb_interfaces/hsrb_interfaces . && \
-#     cp -r /root/hsr-demo-lab/deps/hsrb_interfaces/hsrb_interface_py . && \
-#     cd /root/catkin_ws && \
-#     # Install missing hsrb_interface dependencies
-#     apt-get update && \
-#     apt-get install -y python3-pip python3-dev && \
-#     pip3 install numpy scipy && \
-#     rosdep update && \
-#     rosdep install --from-paths src --ignore-src -r -y --rosdistro noetic || true && \
-#     source /opt/ros/noetic/setup.bash && \
-#     catkin_make
-    
-# Modify .bashrc to source the new workspace after ROS
-RUN sed -i '/source \/opt\/ros\/noetic\/setup.bash/a \    source \/root\/catkin_ws\/devel\/setup.bash' /root/.bashrc
-
 # Configure chrony
 RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
     echo "server hsrb.local" > /etc/chrony/chrony.conf && \
@@ -150,7 +130,6 @@ RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
 RUN mkdir -p /root/hsr-demo-lab
 
 # Install Jupyter Notebook
-# Dont use the virtual environtment in the folder /root/hsr-demo-lab, as the directory is mounted to the host
 RUN python3 -m venv /root/hsr_env && \
     . /root/hsr_env/bin/activate && \
     pip install --upgrade pip && \
@@ -171,13 +150,12 @@ RUN mkdir ~/.vnc && x11vnc -storepasswd 1234 ~/.vnc/passwd
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
-# Ensure startup script sources the workspace
 RUN printf "\nsource /opt/ros/noetic/setup.bash\nsource /root/catkin_ws/devel/setup.bash\n" >> /startup.sh
 
 # Set default working directory
 WORKDIR /root/hsr-demo-lab
 
-# Map container port 8080 to host port 8081 and container port 8888 to host port 8889
+# Map container ports
 EXPOSE 5900 8081 9113
 
 # Run the startup script
