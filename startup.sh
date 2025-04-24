@@ -5,22 +5,43 @@ set -e
 # Start system bus
 sudo /etc/init.d/dbus start
 
-# Start Xvfb
+# Start Xvfb with more clear logging and error checking
+echo "Starting Xvfb..."
 Xvfb :1 -screen 0 1024x768x16 &
-sleep 5
+XVFB_PID=$!
 
-# Export display for X applications
+# Wait for Xvfb to be ready
+echo "Waiting for Xvfb to start..."
+sleep 5
+if ! ps -p $XVFB_PID > /dev/null; then
+    echo "Xvfb failed to start"
+    exit 1
+fi
+
+# Set DISPLAY environment variable
 export DISPLAY=:1
+echo "Display is set to $DISPLAY"
+
+# Verify X server is working
+if ! xdpyinfo >/dev/null 2>&1; then
+    echo "ERROR: X server at display $DISPLAY is not working"
+    exit 1
+fi
+echo "X server is working properly"
 
 # Start a minimal window manager
+echo "Starting window manager..."
 twm &
+sleep 2
 
-# Start X11VNC
-x11vnc -forever -usepw -create -display :1 &
-sleep 10
+# Start X11VNC with verbose logging
+echo "Starting x11vnc..."
+x11vnc -display :1 -forever -usepw -create -v &
+sleep 2
 
-# Start noVNC
-/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 0.0.0.0:8081 &
+# Start noVNC - use 127.0.0.1 instead of localhost
+echo "Starting noVNC proxy..."
+/opt/novnc/utils/novnc_proxy --vnc 127.0.0.1:5900 --listen 0.0.0.0:8081 &
 
 # Create a script to run in xterm that ensures tmux is started
 cat << EOF > /root/start_tmux.sh
@@ -58,9 +79,6 @@ source /opt/ros/noetic/setup.bash
 export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH
 source /root/hsr_env/bin/activate
 jupyter notebook --allow-root --config=/root/.jupyter/jupyter_notebook_config.py &
-
-# Source ROS environments
-source /opt/ros/noetic/setup.bash
 
 # Keep the container running
 tail -f /dev/null
