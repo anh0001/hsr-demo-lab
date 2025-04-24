@@ -152,43 +152,35 @@ To establish a direct wired connection to the HSR without needing a DHCP server,
 
 ### PC Side Configuration (Ubuntu 20.04):
 
-1. Create a new NetworkManager connection file:
+1. Identify your Ethernet interface name:
    ```bash
-   sudo nano /etc/NetworkManager/system-connections/link-local.nmconnection
+   nmcli device status | grep ethernet
    ```
+   Look for the interface in the left column (e.g., `enp3s0`).
 
-2. Add the following content to the file:
-   ```
-   [connection]
-   id=link-local
-   type=ethernet
-   autoconnect=false
-   
-   [ipv4]
-   method=link-local
-   
-   [ipv6]
-   method=ignore
-   ```
-
-3. Set proper permissions and restart NetworkManager:
+2. Create a link-local connection using nmcli:
    ```bash
-   sudo chmod 600 /etc/NetworkManager/system-connections/link-local.nmconnection
-   sudo systemctl restart NetworkManager
+   sudo nmcli connection add \
+     type ethernet \
+     con-name link-local \
+     ifname <your_interface> \
+     autoconnect yes \
+     ipv4.method link-local \
+     ipv6.method ignore
    ```
 
-4. Activate the connection (replace "eth0" with your Ethernet interface name):
+3. Activate the link-local connection:
    ```bash
-   sudo nmcli connection up link-local ifname eth0
+   sudo nmcli connection up link-local
    ```
 
-5. Verify the configuration:
+4. Verify the configuration on your interface:
    ```bash
-   ip addr show
+   ip addr show <your_interface>
    ```
-   You should see an IPv4 address in the 169.254.x.x range on your Ethernet interface.
+   You should see an IPv4 address in the 169.254.x.x range.
 
-6. Test the connection to the HSR:
+5. Test connectivity to the HSR:
    ```bash
    ping hsrb.local
    ```
