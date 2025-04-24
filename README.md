@@ -13,6 +13,26 @@ The HSR Demo Lab is designed to facilitate the development of software for the T
 
 This repository serves as a central resource for researchers, developers, and students working on projects involving the Toyota HSR, enabling them to quickly set up their development environment and start creating applications for the robot.
 
+## Submodules
+
+This repository includes the following submodules:
+- [hsrb_interfaces](https://github.com/hsr-project/hsrb_interfaces.git) - Official HSR interfaces from Toyota HSR project
+- [hsr_kinematics](https://github.com/hsr-project/hsr_kinematics.git) - HSR kinematics library from Toyota HSR project
+
+## Cloning This Repository
+
+To clone this repository with all submodules:
+
+```bash
+git clone --recurse-submodules https://github.com/your-username/hsr-demo-lab.git
+```
+
+Or if you've already cloned the repository:
+
+```bash
+git submodule update --init --recursive
+```
+
 ## Getting Started
 
 You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or using Docker (recommended for macOS users).
@@ -21,7 +41,7 @@ You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or u
 
 1. Clone this repo and navigate to the directory:
    ```
-   git clone https://github.com/your-username/hsr-demo-lab.git
+   git clone --recurse-submodules https://github.com/your-username/hsr-demo-lab.git
    cd hsr-demo-lab
    ```
 
@@ -58,6 +78,16 @@ You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or u
    sudo apt-get install ros-noetic-tmc-desktop-full
    ```
 
+8. Build HSR interfaces from the submodules:
+   ```bash
+   mkdir -p ~/catkin_ws/src
+   cp -r deps/hsrb_interfaces ~/catkin_ws/src/
+   cp -r deps/hsr_kinematics ~/catkin_ws/src/
+   cd ~/catkin_ws
+   source /opt/ros/noetic/setup.bash
+   catkin_make
+   ```
+
 ### Option 2: Docker Setup (Recommended for macOS)
 
 This option is particularly useful for developers using macOS laptops.
@@ -70,7 +100,7 @@ This option is particularly useful for developers using macOS laptops.
 #### Steps:
 1. Clone the repository:
    ```bash
-   git clone https://github.com/anh0001/hsr-demo-lab.git
+   git clone --recurse-submodules https://github.com/your-username/hsr-demo-lab.git
    cd hsr-demo-lab
    ```
 
@@ -89,7 +119,7 @@ This option is particularly useful for developers using macOS laptops.
      ```bash
      open http://localhost:8080/
      ```
-     Enter the password: 1233
+     Enter the password: 1234
      Use the tmux terminal within noVNC for command-line operations
 
    - Open Jupyter Notebook:
@@ -243,6 +273,16 @@ rosservice call /marker/start_recognition "{}"
 Launch RViz with HSR configuration:
 ```bash
 rosrun rviz rviz -d $(rospack find hsrb_common_launch)/config/hsrb_display_full_hsrb.rviz
+```
+
+## Updating Submodules
+
+To update the submodules to their latest versions:
+
+```bash
+git submodule update --remote --merge
+git add deps/hsrb_interfaces deps/hsr_kinematics
+git commit -m "Update submodules to latest versions"
 ```
 
 ## Uninstalling ROS HSR
