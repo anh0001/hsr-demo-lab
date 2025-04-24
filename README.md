@@ -188,7 +188,7 @@ To establish a direct wired connection to the HSR without needing a DHCP server,
 ### Connection Verification and Credentials
 
 - To check the connection to the HSR or find its IP address:
-  ```bash
+  ```
   ping hsrb.local
   ```
 
@@ -204,64 +204,79 @@ To establish a direct wired connection to the HSR without needing a DHCP server,
   Password: jD3k4G2e
   ```
 
-## Running the Simulator
-
-```bash
-roslaunch hsrb_gazebo_launch hsrb_megaweb2015_world.launch
-```
-
 ## Time Synchronization
 
-### When a Time Synchronization Server is Available
+For applications that use tf, time synchronization between the robot and client PC is critical. Problems will occur if the time is not strictly synchronized.
 
-#### Robot Configuration:
-1. SSH into the robot:
+### Robot Side Configuration
+
+#### When a Time Synchronization Server is Available:
+
+1. Log into the robot using administrator permissions:
    ```bash
    ssh administrator@hsrb.local
    ```
-2. Change configuration:
+   When prompted, enter the administrator password.
+
+2. Change the configuration file:
    ```bash
    cd /etc/chrony
    sudo rm chrony.conf
    sudo ln -s chrony.conf.client chrony.conf
    ```
-3. Manual time synchronization:
+
+3. Synchronization server configuration:
+   The default configuration uses ntp.nict.jp. You can edit the `/etc/chrony/chrony.conf.client` file if you need to use a different time server.
+
+4. Manual time synchronization:
    ```bash
-   sudo ntpdate {{ Time synchronization server }}
+   sudo ntpdate <time_synchronization_server>
    ```
-4. Reboot the robot
+   Replace `<time_synchronization_server>` with your server address.
 
-#### Client PC Configuration:
-Configure appropriately to match the network, time synchronization server, and client.
+5. Reboot the robot:
+   Turn off the power by long-pressing the power button, then turn on the power by long-pressing again.
 
-### When a Time Synchronization Server is Unavailable
+#### When a Time Synchronization Server is Unavailable:
 
-#### Robot Configuration:
-1. SSH into the robot:
+In this scenario, the HSR robot itself acts as the time synchronization server.
+
+1. Log into the robot using administrator permissions:
    ```bash
    ssh administrator@hsrb.local
    ```
-2. Change configuration:
+
+2. Change the configuration file:
    ```bash
    cd /etc/chrony
    sudo rm chrony.conf
    sudo ln -s chrony.conf.isolate chrony.conf
    ```
+
 3. Restart chrony:
    ```bash
    sudo service chrony restart
    ```
 
-#### Client PC Configuration:
+### Client PC Configuration
+
+#### When a Time Synchronization Server is Available:
+
+Configure your client PC to use the appropriate time synchronization server for your network.
+
+#### When a Time Synchronization Server is Unavailable:
+
 1. Install chrony:
    ```bash
    sudo apt-get install chrony
    ```
+
 2. Configure chrony:
    ```bash
    sudo mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig
    sudo gedit /etc/chrony/chrony.conf
    ```
+
 3. Add the following settings:
    ```
    server hsrb.local
@@ -275,10 +290,23 @@ Configure appropriately to match the network, time synchronization server, and c
    logchange 0.5
    initstepslew 20 hsrb.local
    ```
+
 4. Restart chrony:
    ```bash
    sudo service chrony restart
    ```
+
+5. Verify synchronization:
+   ```bash
+   chronyc sources
+   ```
+   You should see hsrb.local as a synchronized source (marked with "*").
+
+## Running the Simulator
+
+```bash
+roslaunch hsrb_gazebo_launch hsrb_megaweb2015_world.launch
+```
 
 ## Installing Jupyter Notebook (for Manual Installation)
 
