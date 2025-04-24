@@ -98,7 +98,7 @@ This option is particularly useful for developers using macOS laptops.
 
 3. Run the Docker container:
    ```bash
-   docker run --platform linux/amd64 -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
+   docker run --platform linux/amd64 --network=host -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
    ```
 
 4. Access the development environment:
