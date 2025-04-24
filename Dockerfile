@@ -114,19 +114,23 @@ RUN echo '# please set network-interface' >> /root/.bashrc && \
     echo 'alias sim_mode='"'"'export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc && \
     echo 'alias hsrb_mode='"'"'export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc
 
-# Build HSRB interface from source
-# Copy local 'deps' directory into the image
-COPY ./deps /root/hsr-demo-lab/deps
-RUN mkdir -p /root/catkin_ws/src && \
-    cd /root/catkin_ws/src && \
-    cp -r /root/hsr-demo-lab/deps/hsrb_interfaces . && \
-    cp -r /root/hsr-demo-lab/deps/hsrb_kinematics . && \
-    cd /root/catkin_ws && \
-    rosdep update && \
-    rosdep install --from-paths src --ignore-src -r -y --rosdistro noetic && \
-    source /opt/ros/noetic/setup.bash && \
-    catkin_make
+# # First copy the deps directory
+# COPY ./deps /root/hsr-demo-lab/deps
 
+# RUN mkdir -p /root/catkin_ws/src && \
+#     cd /root/catkin_ws/src && \
+#     cp -r /root/hsr-demo-lab/deps/hsrb_interfaces/hsrb_interfaces . && \
+#     cp -r /root/hsr-demo-lab/deps/hsrb_interfaces/hsrb_interface_py . && \
+#     cd /root/catkin_ws && \
+#     # Install missing hsrb_interface dependencies
+#     apt-get update && \
+#     apt-get install -y python3-pip python3-dev && \
+#     pip3 install numpy scipy && \
+#     rosdep update && \
+#     rosdep install --from-paths src --ignore-src -r -y --rosdistro noetic || true && \
+#     source /opt/ros/noetic/setup.bash && \
+#     catkin_make
+    
 # Modify .bashrc to source the new workspace after ROS
 RUN sed -i '/source \/opt\/ros\/noetic\/setup.bash/a \    source \/root\/catkin_ws\/devel\/setup.bash' /root/.bashrc
 
