@@ -13,24 +13,13 @@ The HSR Demo Lab is designed to facilitate the development of software for the T
 
 This repository serves as a central resource for researchers, developers, and students working on projects involving the Toyota HSR, enabling them to quickly set up their development environment and start creating applications for the robot.
 
-## Submodules
-
-This repository includes the following submodules:
-- [hsrb_interfaces](https://github.com/hsr-project/hsrb_interfaces.git) - Official HSR interfaces from Toyota HSR project
-- [hsr_kinematics](https://github.com/hsr-project/hsr_kinematics.git) - HSR kinematics library from Toyota HSR project
-
 ## Cloning This Repository
 
-To clone this repository with all submodules:
+To clone this repository:
 
 ```bash
-git clone --recurse-submodules https://github.com/your-username/hsr-demo-lab.git
-```
-
-Or if you've already cloned the repository:
-
-```bash
-git submodule update --init --recursive
+git clone https://github.com/anh0001/hsr-demo-lab.git
+cd hsr-demo-lab
 ```
 
 ## Getting Started
@@ -40,8 +29,8 @@ You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or u
 ### Option 1: Manual Setup on Ubuntu 20.04
 
 1. Clone this repo and navigate to the directory:
-   ```
-   git clone --recurse-submodules https://github.com/your-username/hsr-demo-lab.git
+   ```bash
+   git clone https://github.com/anh0001/hsr-demo-lab.git
    cd hsr-demo-lab
    ```
 
@@ -78,11 +67,9 @@ You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or u
    sudo apt-get install ros-noetic-tmc-desktop-full
    ```
 
-8. Build HSR interfaces from the submodules:
+8. Build HSR interfaces:
    ```bash
    mkdir -p ~/catkin_ws/src
-   cp -r deps/hsrb_interfaces ~/catkin_ws/src/
-   cp -r deps/hsr_kinematics ~/catkin_ws/src/
    cd ~/catkin_ws
    source /opt/ros/noetic/setup.bash
    catkin_make
@@ -100,7 +87,7 @@ This option is particularly useful for developers using macOS laptops.
 #### Steps:
 1. Clone the repository:
    ```bash
-   git clone --recurse-submodules https://github.com/your-username/hsr-demo-lab.git
+   git clone https://github.com/anh0001/hsr-demo-lab.git
    cd hsr-demo-lab
    ```
 
@@ -158,6 +145,72 @@ Now you can develop and test your HSR applications within this containerized env
    alias sim_mode='export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'
    alias hsrb_mode='export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'
    ```
+
+## Setting Up Local Link Connection to HSR (Terminal Method)
+
+To establish a direct wired connection to the HSR without needing a DHCP server, you can set up a link-local connection using terminal commands:
+
+### PC Side Configuration (Ubuntu 20.04):
+
+1. Create a new NetworkManager connection file:
+   ```bash
+   sudo nano /etc/NetworkManager/system-connections/link-local.nmconnection
+   ```
+
+2. Add the following content to the file:
+   ```
+   [connection]
+   id=link-local
+   type=ethernet
+   autoconnect=false
+   
+   [ipv4]
+   method=link-local
+   
+   [ipv6]
+   method=ignore
+   ```
+
+3. Set proper permissions and restart NetworkManager:
+   ```bash
+   sudo chmod 600 /etc/NetworkManager/system-connections/link-local.nmconnection
+   sudo systemctl restart NetworkManager
+   ```
+
+4. Activate the connection (replace "eth0" with your Ethernet interface name):
+   ```bash
+   sudo nmcli connection up link-local ifname eth0
+   ```
+
+5. Verify the configuration:
+   ```bash
+   ip addr show
+   ```
+   You should see an IPv4 address in the 169.254.x.x range on your Ethernet interface.
+
+6. Test the connection to the HSR:
+   ```bash
+   ping hsrb.local
+   ```
+
+### Connection Verification and Credentials
+
+- To check the connection to the HSR or find its IP address:
+  ```bash
+  ping hsrb.local
+  ```
+
+- HSR administrator login:
+  ```
+  Username: administrator
+  Password: password
+  ```
+
+- HSR repository credentials:
+  ```
+  Username: hsr-user
+  Password: jD3k4G2e
+  ```
 
 ## Running the Simulator
 
@@ -273,16 +326,6 @@ rosservice call /marker/start_recognition "{}"
 Launch RViz with HSR configuration:
 ```bash
 rosrun rviz rviz -d $(rospack find hsrb_common_launch)/config/hsrb_display_full_hsrb.rviz
-```
-
-## Updating Submodules
-
-To update the submodules to their latest versions:
-
-```bash
-git submodule update --remote --merge
-git add deps/hsrb_interfaces deps/hsr_kinematics
-git commit -m "Update submodules to latest versions"
 ```
 
 ## Uninstalling ROS HSR
