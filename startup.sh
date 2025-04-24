@@ -7,7 +7,7 @@ sudo /etc/init.d/dbus start
 
 # Start Xvfb with more clear logging and error checking
 echo "Starting Xvfb..."
-Xvfb :1 -screen 0 1024x768x16 &
+Xvfb :99 -screen 0 1024x768x16 &
 XVFB_PID=$!
 
 # Wait for Xvfb to be ready
@@ -19,7 +19,7 @@ if ! ps -p $XVFB_PID > /dev/null; then
 fi
 
 # Set DISPLAY environment variable
-export DISPLAY=:1
+export DISPLAY=:99
 echo "Display is set to $DISPLAY"
 
 # Verify X server is working
@@ -36,7 +36,7 @@ sleep 2
 
 # Start X11VNC with verbose logging
 echo "Starting x11vnc..."
-x11vnc -display :1 -forever -usepw -create -v &
+x11vnc -display :99 -forever -usepw -create -v &
 sleep 2
 
 # Start noVNC - use 127.0.0.1 instead of localhost
