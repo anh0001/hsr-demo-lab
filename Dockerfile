@@ -141,6 +141,10 @@ RUN mkdir -p /root/.ipython/profile_default/startup/ && \
     echo "os.environ['ROS_MASTER_URI'] = 'http://hsrb.local:11311'" >> /root/.ipython/profile_default/startup/00-ros.py && \
     echo "os.environ['PYTHONPATH'] = '/opt/ros/noetic/lib/python3/dist-packages:' + os.environ.get('PYTHONPATH','')" >> /root/.ipython/profile_default/startup/00-ros.py
 
+# Copy startup script early so it can be modified
+COPY startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
 # patch startup.sh to source ROS & set PYTHONPATH before Jupyter
 RUN sed -i '/jupyter notebook/i source /opt/ros/noetic/setup.bash\nexport PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH' /startup.sh
 
@@ -160,12 +164,6 @@ RUN git clone https://github.com/novnc/noVNC.git /opt/novnc \
 
 # Set up VNC password
 RUN mkdir ~/.vnc && x11vnc -storepasswd 1234 ~/.vnc/passwd
-
-# Copy startup script
-COPY startup.sh /startup.sh
-RUN chmod +x /startup.sh
-
-RUN printf "\nsource /opt/ros/noetic/setup.bash\nsource /root/catkin_ws/devel/setup.bash\n" >> /startup.sh
 
 # Set default working directory
 WORKDIR /root/hsr-demo-lab
