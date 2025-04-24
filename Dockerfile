@@ -133,7 +133,7 @@ RUN mkdir -p /root/hsr-demo-lab
 RUN python3 -m venv /root/hsr_env && \
     . /root/hsr_env/bin/activate && \
     pip install --upgrade pip && \
-    pip install jupyter
+    pip install jupyter numpy
 
 # create IPython startup to set ROS vars
 RUN mkdir -p /root/.ipython/profile_default/startup/ && \
