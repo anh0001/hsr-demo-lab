@@ -81,7 +81,7 @@ Pin: version 0.3.3*
 Pin-Priority: 1001
 EOF
 
-# Install ROS Noetic Desktop-Full and HSR packages
+# Install ROS Noetic Desktop and HSR packages
 RUN apt-get update && \
     apt-get install -y ros-noetic-tmc-desktop-full && \
     rm -rf /var/lib/apt/lists/*
