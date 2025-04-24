@@ -111,7 +111,7 @@ This option is particularly useful for developers using macOS laptops.
 
    - Open Jupyter Notebook:
      ```bash
-     open http://localhost:8889/
+     open http://localhost:9113/
      ```
 
 Now you can develop and test your HSR applications within this containerized environment.
