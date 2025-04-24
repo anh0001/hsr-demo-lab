@@ -260,47 +260,26 @@ In this scenario, the HSR robot itself acts as the time synchronization server.
 
 ### Client PC Configuration
 
-#### When a Time Synchronization Server is Available:
+#### Docker Setup Users
+For users using the provided Docker setup, time synchronization is already configured in the Dockerfile. No additional setup is required.
 
-Configure your client PC to use the appropriate time synchronization server for your network.
+#### Manual Setup Users
+If you're setting up your environment manually:
 
-#### When a Time Synchronization Server is Unavailable:
+1. When a time synchronization server is available:
+   - Configure your client PC to use the appropriate time synchronization server for your network.
 
-1. Install chrony:
-   ```bash
-   sudo apt-get install chrony
-   ```
+2. When a time synchronization server is unavailable:
+   - Install chrony: `sudo apt-get install chrony`
+   - Configure chrony to use the HSR as the time source (see the Dockerfile in this repository for the exact configuration)
+   - Restart chrony: `sudo service chrony restart`
 
-2. Configure chrony:
-   ```bash
-   sudo mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig
-   sudo gedit /etc/chrony/chrony.conf
-   ```
-
-3. Add the following settings:
-   ```
-   server hsrb.local
-   driftfile /var/lib/chrony/chrony.drift
-   keyfile /etc/chrony/chrony.keys
-   generatecommandkey
-   log tracking measurements statistics
-   logdir /var/log/chrony
-   local stratum 10
-   allow hsrb.local
-   logchange 0.5
-   initstepslew 20 hsrb.local
-   ```
-
-4. Restart chrony:
-   ```bash
-   sudo service chrony restart
-   ```
-
-5. Verify synchronization:
-   ```bash
-   chronyc sources
-   ```
-   You should see hsrb.local as a synchronized source (marked with "*").
+#### Verifying Time Synchronization
+For both Docker and manual setups, verify the synchronization with:
+```bash
+chronyc sources
+```
+You should see hsrb.local as a synchronized source (marked with "*"). This indicates your client PC is successfully synchronizing time with the HSR robot.
 
 ## Running the Simulator
 
