@@ -118,9 +118,8 @@ RUN echo '# please set network-interface' >> /root/.bashrc && \
 # Build HSRB interface from source
 RUN mkdir -p /root/catkin_ws/src && \
     cd /root/catkin_ws/src && \
-    git config --global credential.helper '' && \
-    git clone https://github.com/hsr-project/hsrb_interfaces.git && \
-    git clone https://github.com/hsr-project/hsr_kinematics.git && \
+    cp -r /root/hsr-demo-lab/deps/hsrb_interfaces . && \
+    cp -r /root/hsr-demo-lab/deps/hsrb_kinematics . && \
     cd /root/catkin_ws && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -r -y --rosdistro noetic && \
