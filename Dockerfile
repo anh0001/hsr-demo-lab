@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     chrony \
     ntpdate \
+    sshpass \
+    openssh-client \
  && setcap 'cap_sys_time=+ep' /usr/sbin/chronyd \
  && rm -rf /var/lib/apt/lists/*
 
@@ -99,23 +101,26 @@ RUN apt-get update && apt-get install -y \
 # Set up environment
 RUN echo "source /opt/ros/noetic/setup.bash" >> /etc/bash.bashrc
 
-# Add HSR-specific environment setup to .bashrc
-RUN echo '# please set network-interface' >> /root/.bashrc && \
-    echo 'network_if=eno1' >> /root/.bashrc && \
-    echo 'if [ -e /opt/ros/noetic/setup.bash ] ; then' >> /root/.bashrc && \
+# Replace HSR-specific environment setup to .bashrc with dynamic network detection
+RUN echo '# Dynamic network interface detection' >> /root/.bashrc && \
+    echo 'network_if=$(ip -o -4 route show to default | awk '"'"'{print $5; exit}'"'"')' >> /root/.bashrc && \
+    echo 'if [ -z "$network_if" ]; then' >> /root/.bashrc && \
+    echo '    network_if=$(ip -o -4 addr | awk '"'"'{print $2; exit}'"'"' | sed '"'"'s/://'"'"')' >> /root/.bashrc && \
+    echo 'fi' >> /root/.bashrc && \
+    echo 'if [ -e /opt/ros/noetic/setup.bash ]; then' >> /root/.bashrc && \
     echo '    source /opt/ros/noetic/setup.bash' >> /root/.bashrc && \
     echo 'else' >> /root/.bashrc && \
     echo '    echo "ROS packages are not installed."' >> /root/.bashrc && \
     echo 'fi' >> /root/.bashrc && \
-    echo 'export TARGET_IP=$(LANG=C /sbin/ip address show $network_if | grep -Eo '"'"'inet (addr:)?([0-9]*\.){3}[0-9]*'"'"' | grep -Eo '"'"'([0-9]*\.){3}[0-9]*'"'"')' >> /root/.bashrc && \
-    echo 'if [ -z "$TARGET_IP" ] ; then' >> /root/.bashrc && \
-    echo '    echo "ROS_IP is not set."' >> /root/.bashrc && \
+    echo 'if [ -n "$network_if" ]; then' >> /root/.bashrc && \
+    echo '    TARGET_IP=$(ip -o -4 addr show $network_if | grep -Eo '"'"'([0-9]{1,3}\.){3}[0-9]{1,3}'"'"') || TARGET_IP=$(hostname -I | awk '"'"'{print $1}'"'"')' >> /root/.bashrc && \
     echo 'else' >> /root/.bashrc && \
-    echo '    export ROS_IP=$TARGET_IP' >> /root/.bashrc && \
+    echo '    TARGET_IP=$(hostname -I | awk '"'"'{print $1}'"'"')' >> /root/.bashrc && \
     echo 'fi' >> /root/.bashrc && \
+    echo 'export ROS_IP=$TARGET_IP' >> /root/.bashrc && \
     echo 'export ROS_HOME=~/.ros' >> /root/.bashrc && \
-    echo 'alias sim_mode='"'"'export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc && \
-    echo 'alias hsrb_mode='"'"'export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'"'"'' >> /root/.bashrc
+    echo 'alias sim_mode="export ROS_MASTER_URI=http://localhost:11311; PS1=\"\\[\\033[44;1;37m\\]<local>\\[\\033[0m\\]\\w$ \""' >> /root/.bashrc && \
+    echo 'alias hsrb_mode="export ROS_MASTER_URI=http://hsrb.local:11311; PS1=\"\\[\\033[41;1;37m\\]<hsrb>\\[\\033[0m\\]\\w$ \""' >> /root/.bashrc
 
 # Configure chrony
 RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
@@ -145,6 +150,10 @@ RUN mkdir -p /root/.ipython/profile_default/startup/ && \
     echo "import os" > /root/.ipython/profile_default/startup/00-ros.py && \
     echo "os.environ['ROS_MASTER_URI'] = 'http://hsrb.local:11311'" >> /root/.ipython/profile_default/startup/00-ros.py && \
     echo "os.environ['PYTHONPATH'] = '/opt/ros/noetic/lib/python3/dist-packages:' + os.environ.get('PYTHONPATH','')" >> /root/.ipython/profile_default/startup/00-ros.py
+
+# Copy sync_time.sh script and make it executable
+COPY sync_time.sh /usr/local/bin/sync_time.sh
+RUN chmod +x /usr/local/bin/sync_time.sh
 
 # Copy startup script early so it can be modified
 COPY startup.sh /startup.sh
