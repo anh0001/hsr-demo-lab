@@ -71,6 +71,13 @@ if [ -z "$INTERFACE_IP" ]; then
 fi
 echo "Interface $NETWORK_IF has IP: $INTERFACE_IP"
 
+#
+# Remove existing container if it exists
+existing_container=$(docker ps -aq -f name=hsr_container)
+if [ -n "$existing_container" ]; then
+    echo "Removing existing container hsr_container..."
+    docker rm -f hsr_container
+fi
 # Start container
 echo "Starting HSR Docker container..."
 echo "- Network interface: $NETWORK_IF"
