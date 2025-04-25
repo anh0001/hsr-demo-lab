@@ -6,6 +6,23 @@ HSR_USER="administrator"
 HSR_PASSWORD="password"
 HSR_HOST="hsrb.local"
 
+# Get current time in UTC
+UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%S")
+echo "Current UTC time is: $UTC_TIME"
+
+# Disable NTP on HSR
+echo "Disabling NTP on HSR robot..."
+sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST 'sudo timedatectl set-ntp false'
+
+# Set time on HSR to UTC time
+echo "Setting HSR robot time to UTC: $UTC_TIME"
+sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST "sudo date -u -s \"$UTC_TIME\""
+
+# Re-enable NTP on HSR
+echo "Re-enabling NTP on HSR robot..."
+sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST 'sudo timedatectl set-ntp true'
+
+# Now continue with the original script
 echo "Fetching current time from HSR robot..."
 # Using sshpass to provide password non-interactively
 HSR_TIME=$(sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST 'date +"%Y-%m-%d %H:%M:%S"')
