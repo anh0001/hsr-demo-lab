@@ -101,17 +101,24 @@ RUN apt-get update && apt-get install -y \
 # Set up environment
 RUN echo "source /opt/ros/noetic/setup.bash" >> /etc/bash.bashrc
 
-# Replace HSR-specific environment setup to .bashrc with Ethernet prioritizing network detection
-RUN echo '# Ethernet prioritizing network interface detection' >> /root/.bashrc && \
-    echo '# Prioritize Ethernet interfaces' >> /root/.bashrc && \
-    echo 'network_if=$(ip -o -4 link | grep -E '"'"'eth|en|eno|ens|enp'"'"' | awk '"'"'{print $2}'"'"' | sed '"'"'s/://'"'"' | head -1)' >> /root/.bashrc && \
-    echo 'if [ -z "$network_if" ]; then' >> /root/.bashrc && \
-    echo '    # Fallback to default route interface' >> /root/.bashrc && \
-    echo '    network_if=$(ip -o -4 route show to default | awk '"'"'{print $5; exit}'"'"')' >> /root/.bashrc && \
-    echo 'fi' >> /root/.bashrc && \
-    echo 'if [ -z "$network_if" ]; then' >> /root/.bashrc && \
-    echo '    # Last fallback to any interface' >> /root/.bashrc && \
-    echo '    network_if=$(ip -o -4 addr | awk '"'"'{print $2; exit}'"'"' | sed '"'"'s/://'"'"')' >> /root/.bashrc && \
+# Replace HSR-specific environment setup with environment variable support
+RUN echo '# Network interface detection with environment variable support' >> /root/.bashrc && \
+    echo '# Use environment variable NETWORK_INTERFACE if provided' >> /root/.bashrc && \
+    echo 'if [ -n "$NETWORK_INTERFACE" ]; then' >> /root/.bashrc && \
+    echo '    network_if=$NETWORK_INTERFACE' >> /root/.bashrc && \
+    echo '    echo "Using explicitly specified network interface: $network_if"' >> /root/.bashrc && \
+    echo 'else' >> /root/.bashrc && \
+    echo '    # Prioritize Ethernet interfaces' >> /root/.bashrc && \
+    echo '    network_if=$(ip -o -4 link | grep -E '"'"'eth|en|eno|ens|enp'"'"' | awk '"'"'{print $2}'"'"' | sed '"'"'s/://'"'"' | head -1)' >> /root/.bashrc && \
+    echo '    if [ -z "$network_if" ]; then' >> /root/.bashrc && \
+    echo '        # Fallback to default route interface' >> /root/.bashrc && \
+    echo '        network_if=$(ip -o -4 route show to default | awk '"'"'{print $5; exit}'"'"')' >> /root/.bashrc && \
+    echo '    fi' >> /root/.bashrc && \
+    echo '    if [ -z "$network_if" ]; then' >> /root/.bashrc && \
+    echo '        # Last fallback to any interface' >> /root/.bashrc && \
+    echo '        network_if=$(ip -o -4 addr | awk '"'"'{print $2; exit}'"'"' | sed '"'"'s/://'"'"')' >> /root/.bashrc && \
+    echo '    fi' >> /root/.bashrc && \
+    echo '    echo "Auto-detected network interface: $network_if"' >> /root/.bashrc && \
     echo 'fi' >> /root/.bashrc && \
     echo 'if [ -e /opt/ros/noetic/setup.bash ]; then' >> /root/.bashrc && \
     echo '    source /opt/ros/noetic/setup.bash' >> /root/.bashrc && \
@@ -164,6 +171,9 @@ RUN chmod +x /usr/local/bin/sync_time.sh
 # Copy startup script early so it can be modified
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
+
+# Add network interface verification to startup.sh
+RUN sed -i '3i\# Network interface verification\necho "Network configuration:"\necho "NETWORK_INTERFACE environment variable is: $NETWORK_INTERFACE"\nif [ -n "$NETWORK_INTERFACE" ]; then\n    echo "Using explicitly specified interface: $NETWORK_INTERFACE"\n    # Verify the interface exists\n    if ip link show $NETWORK_INTERFACE >/dev/null 2>&1; then\n        echo "Interface $NETWORK_INTERFACE exists and will be used"\n        echo "IP address: $(ip -o -4 addr show $NETWORK_INTERFACE | grep -Eo '"'"'([0-9]{1,3}\\.){3}[0-9]{1,3}'"'"')"\n    else\n        echo "WARNING: Specified interface $NETWORK_INTERFACE does not exist!"\n        echo "Available interfaces:"\n        ip -o -4 link | grep -v "lo" | awk '"'"'{print $2}'"'"' | sed '"'"'s/://'"'"'\n    fi\nfi' /startup.sh
 
 # patch startup.sh to source ROS & set PYTHONPATH before Jupyter
 RUN sed -i '/jupyter notebook/i source /opt/ros/noetic/setup.bash\nexport PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH' /startup.sh
