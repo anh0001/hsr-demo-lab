@@ -101,10 +101,16 @@ RUN apt-get update && apt-get install -y \
 # Set up environment
 RUN echo "source /opt/ros/noetic/setup.bash" >> /etc/bash.bashrc
 
-# Replace HSR-specific environment setup to .bashrc with dynamic network detection
-RUN echo '# Dynamic network interface detection' >> /root/.bashrc && \
-    echo 'network_if=$(ip -o -4 route show to default | awk '"'"'{print $5; exit}'"'"')' >> /root/.bashrc && \
+# Replace HSR-specific environment setup to .bashrc with Ethernet prioritizing network detection
+RUN echo '# Ethernet prioritizing network interface detection' >> /root/.bashrc && \
+    echo '# Prioritize Ethernet interfaces' >> /root/.bashrc && \
+    echo 'network_if=$(ip -o -4 link | grep -E '"'"'eth|en|eno|ens|enp'"'"' | awk '"'"'{print $2}'"'"' | sed '"'"'s/://'"'"' | head -1)' >> /root/.bashrc && \
     echo 'if [ -z "$network_if" ]; then' >> /root/.bashrc && \
+    echo '    # Fallback to default route interface' >> /root/.bashrc && \
+    echo '    network_if=$(ip -o -4 route show to default | awk '"'"'{print $5; exit}'"'"')' >> /root/.bashrc && \
+    echo 'fi' >> /root/.bashrc && \
+    echo 'if [ -z "$network_if" ]; then' >> /root/.bashrc && \
+    echo '    # Last fallback to any interface' >> /root/.bashrc && \
     echo '    network_if=$(ip -o -4 addr | awk '"'"'{print $2; exit}'"'"' | sed '"'"'s/://'"'"')' >> /root/.bashrc && \
     echo 'fi' >> /root/.bashrc && \
     echo 'if [ -e /opt/ros/noetic/setup.bash ]; then' >> /root/.bashrc && \
