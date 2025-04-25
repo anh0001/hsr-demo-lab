@@ -5,13 +5,13 @@
 # Default values
 HSR_IP=169.254.4.231
 IMAGE_NAME=hsr-demo-lab
-NETWORK_IF=""
+NETWORK_IF="enp1s0"  # Default to enp1s0
 
 # Display usage information
 function show_usage {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
-    echo "  -i, --interface INTERFACE  Specify network interface to use (e.g., eth0, enp3s0)"
+    echo "  -i, --interface INTERFACE  Specify network interface to use (default: enp1s0)"
     echo "  -r, --robot-ip IP          Specify HSR robot IP address (default: 169.254.4.231)"
     echo "  -n, --image-name NAME      Specify Docker image name (default: hsr-demo-lab)"
     echo "  -h, --help                 Show this help message"
@@ -48,9 +48,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Auto-detect Ethernet interface if not specified
-if [ -z "$NETWORK_IF" ]; then
-    echo "No network interface specified, attempting to auto-detect..."
+# Check if the default interface exists
+if ! ip link show "$NETWORK_IF" &>/dev/null; then
+    echo "Default interface $NETWORK_IF not found, attempting to auto-detect..."
     NETWORK_IF=$(ip -o -4 link | grep -E 'eth|en|eno|ens|enp' | awk '{print $2}' | sed 's/://' | head -1)
     
     if [ -z "$NETWORK_IF" ]; then
