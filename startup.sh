@@ -74,11 +74,41 @@ c.NotebookApp.token = ''
 c.NotebookApp.password = ''
 EOT
 
-# Start Jupyter Notebook with ROS env
+# Create a startup script for Jupyter that sets hsrb_mode first
+cat <<EOT > /root/start_jupyter_with_hsrb.sh
+#!/bin/bash
+
+# Source ROS setup
 source /opt/ros/noetic/setup.bash
-export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$PYTHONPATH
+
+# Set HSR robot mode (identical to the hsrb_mode alias)
+export ROS_MASTER_URI=http://hsrb.local:11311
+export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "
+echo "Set HSR robot mode: ROS_MASTER_URI=$ROS_MASTER_URI with custom prompt"
+
+# Detect network interface and set ROS_IP
+network_if=\$(ip -o -4 link | grep -E 'eth|en|eno|ens|enp' | awk '{print \$2}' | sed 's/://' | head -1)
+if [ -n "\$network_if" ]; then
+    export ROS_IP=\$(ip -o -4 addr show \$network_if | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+    echo "Detected network interface: \$network_if with IP: \$ROS_IP"
+else
+    echo "Warning: Could not detect network interface"
+fi
+
+# Set up Python environment with ROS
+export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:\$PYTHONPATH
 source /root/hsr_env/bin/activate
-jupyter notebook --allow-root --config=/root/.jupyter/jupyter_notebook_config.py &
+
+# Start Jupyter Notebook
+echo "Starting Jupyter Notebook with HSR robot mode..."
+jupyter notebook --allow-root --config=/root/.jupyter/jupyter_notebook_config.py
+EOT
+
+chmod +x /root/start_jupyter_with_hsrb.sh
+
+# Start Jupyter Notebook with HSR mode
+echo "Starting Jupyter Notebook with HSR robot mode..."
+/root/start_jupyter_with_hsrb.sh &
 
 # Keep the container running
 tail -f /dev/null
