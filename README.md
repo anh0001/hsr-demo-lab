@@ -104,7 +104,7 @@ This option is particularly useful for developers using macOS laptops.
 
 4. Run the Docker container with host mapping:
    ```bash
-   docker run --platform linux/amd64 --network=host -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 --add-host=hsrb.local:IP_ADDRESS -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
+   docker run --platform linux/amd64 --network=host --cap-add SYS_TIME -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 --add-host=hsrb.local:IP_ADDRESS -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
    ```
    Replace `IP_ADDRESS` with the actual IP address you obtained from pinging hsrb.local.
    

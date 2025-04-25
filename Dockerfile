@@ -28,7 +28,9 @@ RUN apt-get update && apt-get install -y \
     tmux \
     wget \
     chrony \
-    && rm -rf /var/lib/apt/lists/*
+    ntpdate \
+ && setcap 'cap_sys_time=+ep' /usr/sbin/chronyd \
+ && rm -rf /var/lib/apt/lists/*
 
 # Add ROS Noetic sources
 RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
