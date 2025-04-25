@@ -102,13 +102,21 @@ This option is particularly useful for developers using macOS laptops.
    ```
    Note down the IP address that appears (e.g., 169.254.4.231)
 
-4. Run the Docker container with host mapping:
+4. Run the Docker container using the provided start script:
    ```bash
-   docker run --platform linux/amd64 --network=host --cap-add SYS_TIME -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 --add-host=hsrb.local:IP_ADDRESS -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
+   chmod +x start_hsr_container.sh
+   ./start_hsr_container.sh
    ```
-   Replace `IP_ADDRESS` with the actual IP address you obtained from pinging hsrb.local.
-   
-   This `--add-host` flag ensures the Docker container can resolve the hostname "hsrb.local" to the correct IP address, which is essential for proper communication with the HSR robot.
+
+   The script will automatically:
+   - Use the default network interface (`enp1s0`) or detect an appropriate Ethernet interface
+   - Set up proper network connectivity with the HSR robot
+   - Mount the current directory to access your code inside the container
+
+   You can also specify a different network interface or robot IP address:
+   ```bash
+   ./start_hsr_container.sh --interface eth0 --robot-ip 169.254.4.231
+   ```
 
 5. Access the development environment:
    - Open noVNC (for GUI access):
@@ -165,7 +173,7 @@ To establish a direct wired connection to the HSR without needing a DHCP server,
    ```bash
    nmcli device status | grep ethernet
    ```
-   Look for the interface in the left column (e.g., `enp3s0`).
+   Look for the interface in the left column (e.g., `enp1s0`).
 
 2. Create a link-local connection using nmcli:
    ```bash
@@ -190,7 +198,7 @@ To establish a direct wired connection to the HSR without needing a DHCP server,
    You should see an IPv4 address in the 169.254.x.x range.
 
 5. Test connectivity to the HSR:
-   ```bash
+   ```
    ping hsrb.local
    ```
 
