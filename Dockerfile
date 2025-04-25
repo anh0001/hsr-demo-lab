@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     gnupg2 \
     curl \
     net-tools \
+    iputils-ping \
     git \
     dbus-x11 \
     sudo \

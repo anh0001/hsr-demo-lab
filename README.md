@@ -96,12 +96,21 @@ This option is particularly useful for developers using macOS laptops.
    docker build --platform linux/amd64 -t hsr-demo-lab .
    ```
 
-3. Run the Docker container:
+3. **Before running the container, get the HSR robot's IP address**:
    ```bash
-   docker run --platform linux/amd64 --network=host -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
+   ping hsrb.local
    ```
+   Note down the IP address that appears (e.g., 169.254.4.231)
 
-4. Access the development environment:
+4. Run the Docker container with host mapping:
+   ```bash
+   docker run --platform linux/amd64 --network=host -p 5900:5900 -p 8081:8081 -p 9113:9113 -p 11311:11311 --add-host=hsrb.local:IP_ADDRESS -v "$(pwd)":/root/hsr-demo-lab/ hsr-demo-lab
+   ```
+   Replace `IP_ADDRESS` with the actual IP address you obtained from pinging hsrb.local.
+   
+   This `--add-host` flag ensures the Docker container can resolve the hostname "hsrb.local" to the correct IP address, which is essential for proper communication with the HSR robot.
+
+5. Access the development environment:
    - Open noVNC (for GUI access):
      ```bash
      open http://localhost:8081/
