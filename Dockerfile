@@ -128,7 +128,9 @@ RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
     echo "local stratum 10" >> /etc/chrony/chrony.conf && \
     echo "allow hsrb.local" >> /etc/chrony/chrony.conf && \
     echo "logchange 0.5" >> /etc/chrony/chrony.conf && \
-    echo "initstepslew 20 hsrb.local" >> /etc/chrony/chrony.conf
+    echo "initstepslew 20 hsrb.local" >> /etc/chrony/chrony.conf && \
+    echo "makestep 1000000 1" >> /etc/chrony/chrony.conf && \
+    echo "maxchange 1000000 0 0" >> /etc/chrony/chrony.conf
 
 RUN mkdir -p /root/hsr-demo-lab
 
