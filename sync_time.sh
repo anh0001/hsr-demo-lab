@@ -10,17 +10,20 @@ HSR_HOST="hsrb.local"
 UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%S")
 echo "Current UTC time is: $UTC_TIME"
 
-# Disable NTP on HSR
+# Prepare the sudo password for non-interactive use
+echo "Configuring SSH for sudo commands on HSR robot..."
+
+# Disable NTP on HSR using echo to pipe password to sudo -S
 echo "Disabling NTP on HSR robot..."
-sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST 'sudo timedatectl set-ntp false'
+sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST "echo '$HSR_PASSWORD' | sudo -S timedatectl set-ntp false"
 
 # Set time on HSR to UTC time
 echo "Setting HSR robot time to UTC: $UTC_TIME"
-sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST "sudo date -u -s \"$UTC_TIME\""
+sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST "echo '$HSR_PASSWORD' | sudo -S date -u -s \"$UTC_TIME\""
 
 # Re-enable NTP on HSR
 echo "Re-enabling NTP on HSR robot..."
-sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST 'sudo timedatectl set-ntp true'
+sshpass -p "$HSR_PASSWORD" ssh -o StrictHostKeyChecking=no $HSR_USER@$HSR_HOST "echo '$HSR_PASSWORD' | sudo -S timedatectl set-ntp true"
 
 # Now continue with the original script
 echo "Fetching current time from HSR robot..."
