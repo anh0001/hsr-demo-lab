@@ -133,35 +133,39 @@ This option is particularly useful for developers using macOS laptops.
 
 Now you can develop and test your HSR applications within this containerized environment.
 
-## Environment Setup (for Manual Installation)
+## Setting Up Internet Sharing (for Ubuntu 22.04)
 
-1. Edit `.bashrc`:
+To allow your HSR robot to access the internet through your computer's WiFi connection, you can set up internet sharing from your WiFi to devices connected via LAN cable.
+
+### Internet Sharing Using NetworkManager (Terminal Method)
+
+1. First, identify your network interfaces:
    ```bash
-   gedit ~/.bashrc
+   nmcli device status
+   ```
+   Note your WiFi interface name (likely "wlan0" or similar) and your Ethernet interface name (likely "eth0", "enp3s0" or similar).
+
+2. Create a shared connection for your Ethernet interface (replace "eth0" with your actual Ethernet interface name):
+   ```bash
+   sudo nmcli connection add type ethernet ifname eth0 ipv4.method shared connection.autoconnect yes connection.id "Shared LAN"
    ```
 
-2. Add the following to the end of `.bashrc`:
+3. Activate the connection:
    ```bash
-   # please set network-interface
-   network_if=eno1
-
-   if [ -e /opt/ros/noetic/setup.bash ] ; then
-       source /opt/ros/noetic/setup.bash
-   else
-       echo "ROS packages are not installed."
-   fi
-
-   export TARGET_IP=$(LANG=C /sbin/ip address show $network_if | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
-   if [ -z "$TARGET_IP" ] ; then
-       echo "ROS_IP is not set."
-   else
-       export ROS_IP=$TARGET_IP
-   fi
-
-   export ROS_HOME=~/.ros
-   alias sim_mode='export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'
-   alias hsrb_mode='export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'
+   sudo nmcli connection up "Shared LAN"
    ```
+
+This configuration will:
+- Set up your Ethernet interface with a static IP (typically 10.42.0.1)
+- Configure DHCP so connected devices (including the HSR) will automatically receive IP addresses
+- Establish NAT (Network Address Translation) to route traffic between your WiFi and LAN devices
+
+Your HSR robot should now be able to access the internet through your computer's WiFi connection. It will automatically receive an IP address in the 10.42.0.x range. If not reboot the HSR robot.
+
+To disable sharing later:
+```bash
+sudo nmcli connection down "Shared LAN"
+```
 
 ## Setting Up Local Link Connection to HSR (Terminal Method)
 
@@ -220,6 +224,36 @@ To establish a direct wired connection to the HSR without needing a DHCP server,
   Username: hsr-user
   Password: jD3k4G2e
   ```
+
+## Environment Setup (for Manual Installation)
+
+1. Edit `.bashrc`:
+   ```bash
+   gedit ~/.bashrc
+   ```
+
+2. Add the following to the end of `.bashrc`:
+   ```bash
+   # please set network-interface
+   network_if=eno1
+
+   if [ -e /opt/ros/noetic/setup.bash ] ; then
+       source /opt/ros/noetic/setup.bash
+   else
+       echo "ROS packages are not installed."
+   fi
+
+   export TARGET_IP=$(LANG=C /sbin/ip address show $network_if | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
+   if [ -z "$TARGET_IP" ] ; then
+       echo "ROS_IP is not set."
+   else
+       export ROS_IP=$TARGET_IP
+   fi
+
+   export ROS_HOME=~/.ros
+   alias sim_mode='export ROS_MASTER_URI=http://localhost:11311 export PS1="\[\033[44;1;37m\]<local>\[\033[0m\]\w$ "'
+   alias hsrb_mode='export ROS_MASTER_URI=http://hsrb.local:11311 export PS1="\[\033[41;1;37m\]<hsrb>\[\033[0m\]\w$ "'
+   ```
 
 ## Time Synchronization
 
@@ -330,19 +364,34 @@ roslaunch hsrb_gazebo_launch hsrb_megaweb2015_world.launch
    ```
    Access it via `http://localhost:8888` in your web browser.
 
-## Marker Recognition
+## Working with the HSR
+
+### Marker Recognition
 
 Enable marker recognition:
 ```bash
 rosservice call /marker/start_recognition "{}"
 ```
 
-## RViz Visualization
+### RViz Visualization
 
 Launch RViz with HSR configuration:
 ```bash
 rosrun rviz rviz -d $(rospack find hsrb_common_launch)/config/hsrb_display_full_hsrb.rviz
 ```
+
+### Running Example Notebooks
+
+The repository includes several Jupyter notebooks that demonstrate different capabilities:
+- `demo_grab_bottle.ipynb`: Demonstrates how to use the HSR to grab a bottle
+- `2024-08-19_grab_bottle_and_throw_demo.ipynb`: Shows a complete demo of grabbing a bottle and disposing of it
+- `2025-04-24_minos_demo.ipynb`: Recent demo notebook with additional capabilities
+
+To run a notebook:
+1. Start the HSR container or set up your environment
+2. Navigate to the Jupyter interface (http://localhost:9113/)
+3. Open the notebooks directory
+4. Select and run the desired notebook
 
 ## Uninstalling ROS HSR
 
