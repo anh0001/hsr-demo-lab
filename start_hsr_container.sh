@@ -3,7 +3,7 @@
 # Script to start the HSR Docker container with proper configuration
 
 # Default values
-HSR_IP=169.254.4.231
+HSR_IP=10.42.0.129
 IMAGE_NAME=hsr-demo-lab
 NETWORK_IF="enp1s0"  # Default to enp1s0
 
