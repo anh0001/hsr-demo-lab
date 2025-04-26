@@ -167,46 +167,7 @@ To disable sharing later:
 sudo nmcli connection down "Shared LAN"
 ```
 
-## Setting Up Local Link Connection to HSR (Terminal Method)
-
-To establish a direct wired connection to the HSR without needing a DHCP server, you can set up a link-local connection using terminal commands:
-
-### PC Side Configuration (Ubuntu 20.04):
-
-1. Identify your Ethernet interface name:
-   ```bash
-   nmcli device status | grep ethernet
-   ```
-   Look for the interface in the left column (e.g., `enp1s0`).
-
-2. Create a link-local connection using nmcli:
-   ```bash
-   sudo nmcli connection add \
-     type ethernet \
-     con-name link-local \
-     ifname <your_interface> \
-     autoconnect yes \
-     ipv4.method link-local \
-     ipv6.method ignore
-   ```
-
-3. Activate the link-local connection:
-   ```bash
-   sudo nmcli connection up link-local
-   ```
-
-4. Verify the configuration on your interface:
-   ```bash
-   ip addr show <your_interface>
-   ```
-   You should see an IPv4 address in the 169.254.x.x range.
-
-5. Test connectivity to the HSR:
-   ```
-   ping hsrb.local
-   ```
-
-### Connection Verification and Credentials
+## Connection Verification and Credentials
 
 - To check the connection to the HSR or find its IP address:
   ```
@@ -312,18 +273,44 @@ In this scenario, the HSR robot itself acts as the time synchronization server.
 ### Client PC Configuration
 
 #### Docker Setup Users
-For users using the provided Docker setup, time synchronization is already configured in the Dockerfile. No additional setup is required.
+For users using the provided Docker setup, time synchronization is already configured in the Dockerfile. The configuration includes:
+
+```
+server hsrb.local iburst
+driftfile /var/lib/chrony/chrony.drift
+keyfile /etc/chrony/chrony.keys
+local stratum 10
+allow 10.42.0.0/16
+bindaddress 0.0.0.0
+logchange 0.5
+makestep 1.0 3
+```
+
+This configuration ensures the container uses the HSR robot as its time source, allowing connections from the 10.42.0.0/16 subnet (which is used by the HSR robot and your development machine).
 
 #### Manual Setup Users
 If you're setting up your environment manually:
 
-1. When a time synchronization server is available:
-   - Configure your client PC to use the appropriate time synchronization server for your network.
+1. Install chrony: `sudo apt-get install chrony`
 
-2. When a time synchronization server is unavailable:
-   - Install chrony: `sudo apt-get install chrony`
-   - Configure chrony to use the HSR as the time source (see the Dockerfile in this repository for the exact configuration)
-   - Restart chrony: `sudo service chrony restart`
+2. Configure chrony to use the HSR as the time source:
+   ```bash
+   sudo nano /etc/chrony/chrony.conf
+   ```
+   
+   Add the following configuration:
+   ```
+   server hsrb.local iburst
+   driftfile /var/lib/chrony/chrony.drift
+   keyfile /etc/chrony/chrony.keys
+   local stratum 10
+   allow 10.42.0.0/16
+   bindaddress 0.0.0.0
+   logchange 0.5
+   makestep 1.0 3
+   ```
+
+3. Restart chrony: `sudo service chrony restart`
 
 #### Verifying Time Synchronization
 For both Docker and manual setups, verify the synchronization with:
