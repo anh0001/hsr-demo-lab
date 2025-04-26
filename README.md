@@ -12,7 +12,7 @@ The recommended hardware setup consists of:
 
 This configuration allows the NUC to serve as an intermediate computing unit that:
 - Connects to the HSR robot via wired Ethernet
-- Connects to the internet via WiFi
+- Connects NUC computer to the internet via WiFi
 - Can be remotely accessed from your development laptop
 
 ## Repository Description
@@ -41,7 +41,7 @@ You can set up the HSR Demo Lab environment either manually on Ubuntu 20.04 or u
 
 ## Setting Up Internet Sharing on Ubuntu
 
-To allow your HSR robot to access the internet through your computer's WiFi connection, follow these steps to set up internet sharing from your WiFi to devices connected via LAN cable.
+To allow your HSR robot to access the internet through your NUC computer's WiFi connection, follow these steps to set up internet sharing from your WiFi to devices connected via LAN cable.
 
 ### Internet Sharing Using NetworkManager (Terminal Method)
 
