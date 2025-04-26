@@ -137,18 +137,17 @@ RUN echo '# Network interface detection with environment variable support' >> /r
 
 # Configure chrony
 RUN mv /etc/chrony/chrony.conf /etc/chrony/chrony.conf.orig && \
-    echo "server hsrb.local" > /etc/chrony/chrony.conf && \
+    echo "# Use HSR robot as time source" > /etc/chrony/chrony.conf && \
+    echo "server hsrb.local iburst" >> /etc/chrony/chrony.conf && \
     echo "driftfile /var/lib/chrony/chrony.drift" >> /etc/chrony/chrony.conf && \
     echo "keyfile /etc/chrony/chrony.keys" >> /etc/chrony/chrony.conf && \
-    echo "generatecommandkey" >> /etc/chrony/chrony.conf && \
+    echo "commandkey 1" >> /etc/chrony/chrony.conf && \
     echo "log tracking measurements statistics" >> /etc/chrony/chrony.conf && \
     echo "logdir /var/log/chrony" >> /etc/chrony/chrony.conf && \
-    echo "local stratum 10" >> /etc/chrony/chrony.conf && \
-    echo "allow hsrb.local" >> /etc/chrony/chrony.conf && \
+    echo "maxupdateskew 100.0" >> /etc/chrony/chrony.conf && \
     echo "logchange 0.5" >> /etc/chrony/chrony.conf && \
-    echo "initstepslew 20 hsrb.local" >> /etc/chrony/chrony.conf && \
-    echo "makestep 1000000 1" >> /etc/chrony/chrony.conf && \
-    echo "maxchange 1000000 0 0" >> /etc/chrony/chrony.conf
+    echo "# Allow large first correction when time is way off" >> /etc/chrony/chrony.conf && \
+    echo "makestep 1.0 3" >> /etc/chrony/chrony.conf
 
 RUN mkdir -p /root/hsr-demo-lab
 
